@@ -36,8 +36,13 @@
         .result { display:none; background:#f8fff8; border-left:8px solid var(--success); padding:35px; border-radius:16px; margin-top:30px; text-align:center; }
         .result.show { display:block; animation:fadeIn 0.7s; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:none;} }
-        .code { font-size:3.8rem; font-weight:900; color:var(--primary); letter-spacing:6px; margin:25px 0; }
-        .warning { background:#fff8e1; border-left:5px solid var(--warning); padding:15px; border-radius:8px; margin:20px 0; font-size:0.95rem; }
+        .code { font-size:4.2rem; font-weight:900; color:var(--primary); letter-spacing:8px; font-family:'Courier New',monospace; background:#f0f7ff; display:inline-block; padding:12px 28px; border-radius:12px; margin:30px 0; }
+        .warning { background:#fff8e1; border-left:5px solid var(--warning); padding:18px; border-radius:8px; margin:25px 0; font-size:1rem; }
+        .alternatives { margin-top:35px; background:#f9f9f9; border-radius:12px; padding:20px; display:none; }
+        .alternatives.show { display:block; }
+        .alt-title { font-size:1.4rem; color:#d84315; margin-bottom:15px; text-align:left; }
+        .alt-item { background:white; padding:16px; margin-bottom:12px; border-radius:10px; border-left:4px solid #ff9800; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:left; }
+        .alt-code { font-size:1.6rem; font-weight:bold; color:#e65100; font-family:monospace; }
         .rita-btn { display:block; margin:30px auto 0; background:var(--success); color:white; padding:16px 40px; border-radius:50px; text-decoration:none; font-weight:600; max-width:380px; }
         .rita-btn:hover { background:#1b5e20; }
         .history { background:#f8f9fa; border-radius:12px; padding:20px; margin-top:30px; max-height:400px; overflow-y:auto; }
@@ -67,14 +72,15 @@
     <div class="main">
         <div class="search-card">
             <h2 class="card-title">Description du produit</h2>
-            <input type="text" id="product" placeholder="Ex: t-shirt coton, iPhone 16, sac cuir...">
+            <input type="text" id="product" placeholder="Ex: t-shirt coton, iPhone 16, sac cuir..."
+                   onkeypress="if(event.key==='Enter') search()">
 
             <div class="examples">
                 <button class="example-btn" onclick="setExample('T-shirt en coton 100%')">T-shirt</button>
                 <button class="example-btn" onclick="setExample('iPhone 16 Pro')">iPhone</button>
                 <button class="example-btn" onclick="setExample('Sac à main en cuir')">Sac cuir</button>
                 <button class="example-btn" onclick="setExample('Café en grains 1kg')">Café</button>
-                <button class="example-btn" onclick="setExample('Chaussures de running')">Chaussures</button>
+                <button class="example-btn" onclick="setExample('Montre connectée avec écran OLED')">Montre</button>
             </div>
 
             <button onclick="search()" class="button">Rechercher le code SH</button>
@@ -82,20 +88,24 @@
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Recherche précise en cours...</p>
+            <p>Analyse précise en cours...</p>
         </div>
 
         <div class="result" id="result">
-            <h3 style="margin-bottom:25px;">Résultat</h3>
+            <h3 style="margin-bottom:25px;">Résultat principal</h3>
             <div class="code" id="code">—</div>
             <p style="font-size:1.2rem;"><strong>Description :</strong> <span id="desc">-</span></p>
-            <p style="font-size:1rem;"><strong>Précision :</strong> <span id="info">-</span></p>
+            <p style="font-size:1rem;"><strong>Info :</strong> <span id="info">-</span></p>
+
             <div id="warning" class="warning" style="display:none;"></div>
 
+            <div id="alternatives" class="alternatives">
+                <div class="alt-title">Codes alternatifs possibles</div>
+                <div id="alt-list"></div>
+            </div>
+
             <div style="margin-top:30px;">
-                <button id="copy-btn" class="button btn-copy">
-                    Copier le code
-                </button>
+                <button id="copy-btn" class="button btn-copy">Copier le code principal</button>
                 <a id="rita" href="#" target="_blank" class="rita-btn">Vérifier sur RITA (officiel)</a>
             </div>
         </div>
@@ -104,7 +114,7 @@
         <div class="history" id="history">
             <h3 style="margin-bottom:15px; color:var(--primary); text-align:center;">
                 Historique des recherches
-                <button onclick="exportAll()" class="button btn-small" style="float:right; font-size:0.9rem; padding:8px 16px;">Exporter tout (.txt)</button>
+                <button onclick="exportAll()" class="button" style="float:right; font-size:0.9rem; padding:8px 16px;">Exporter tout (.txt)</button>
                 <button onclick="clearHistory()" class="button" style="float:right; margin-right:10px; font-size:0.9rem; padding:8px 16px; background:#e0e0e0; color:#333;">Vider</button>
             </h3>
             <div id="history-list"></div>
@@ -117,28 +127,24 @@
     </div>
 
     <footer>
-        Code SH 2025 • Outil interne
+        Code SH 2025 • Outil interne • Alternatives intégrées
     </footer>
 </div>
 
-<!-- Popup Activation -->
+<!-- Modal Activation -->
 <div class="modal" id="settings-modal">
     <div class="modal-content">
         <span class="close" onclick="closeSettings()">×</span>
-        <h2 style="margin-bottom:20px; color:var(--primary); text-align:center;">Activation de l'outil</h2>
+        <h2 style="margin-bottom:20px; color:var(--primary); text-align:center;">Activation de l’outil</h2>
         
         <div style="margin-bottom:25px; text-align:center;">
-            <label style="display:block; margin-bottom:10px;">Clé d'activation</label>
-            <input type="password" id="api-key" placeholder="Collez votre clé ici" style="text-align:center;">
-            <small style="color:#666; display:block; margin-top:8px;">
-                Stockée uniquement sur votre appareil
-            </small>
+            <label style="display:block; margin-bottom:10px; font-weight:600;">Clé d’activation</label>
+            <input type="password" id="api-key" placeholder="Collez votre clé ici" style="text-align:center; width:100%; padding:14px; border-radius:8px; border:1px solid #ccc;">
+            <small style="color:#666; display:block; margin-top:8px;">Stockée uniquement sur votre appareil</small>
         </div>
 
         <div style="text-align:center; margin:25px 0;">
-            <p style="margin-bottom:15px; color:#555;">
-                Vous n'avez pas encore de clé ?
-            </p>
+            <p style="margin-bottom:15px; color:#555;">Vous n’avez pas encore de clé ?</p>
             <a href="https://wa.me/33695826180?text=Bonjour%2C%20je%20souhaiterais%20une%20cl%C3%A9%20d'activation%20pour%20l'outil%20Code%20SH%202025" 
                target="_blank" 
                class="button btn-whatsapp" 
@@ -147,15 +153,18 @@
             </a>
         </div>
 
-        <button onclick="saveConfig()" class="button" style="width:100%;">Activer l'outil</button>
+        <button onclick="saveConfig()" class="button" style="width:100%;">Activer l’outil</button>
     </div>
 </div>
 
 <script>
     const historyList = document.getElementById('history-list');
     const warningDiv = document.getElementById('warning');
+    const alternativesDiv = document.getElementById('alternatives');
+    const altList = document.getElementById('alt-list');
     const copyBtn = document.getElementById('copy-btn');
     const codeElement = document.getElementById('code');
+    let isSearching = false;
 
     // Historique
     let history = JSON.parse(localStorage.getItem('sh_history') || '[]');
@@ -184,7 +193,7 @@
     }
 
     function clearHistory() {
-        if (confirm("Vider tout l'historique ?")) {
+        if (confirm("Vider tout l’historique ?")) {
             history = [];
             localStorage.removeItem('sh_history');
             renderHistory();
@@ -193,53 +202,51 @@
 
     function exportAll() {
         if (history.length === 0) return alert("Historique vide");
-        const lines = history.map(item => `${item.date.slice(0,10)} | ${item.product} | ${item.code} | ${item.desc}`);
-        const text = "HISTORIQUE CODE SH\n\n" + lines.join("\n");
+        const lines = history.map(item => `${new Date(item.date).toISOString().slice(0,10)} | ${item.product} | ${item.code} | ${item.desc}`);
+        const text = "HISTORIQUE CODE SH 2025\n\n" + lines.join("\n");
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `Historique_CodeSH_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+        a.href = url; a.download = `CodeSH_Historique_${new Date().toISOString().slice(0,10)}.txt`; a.click();
         URL.revokeObjectURL(url);
     }
 
-    // Copie robuste
+    // Copie
     function copyCode() {
         const code = codeElement.textContent.trim();
         if (!code || code === '—') return;
 
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(code).then(showCopied).catch(fallbackCopy);
+            navigator.clipboard.writeText(code).then(showCopied);
         } else {
-            fallbackCopy();
-        }
-
-        function fallbackCopy() {
             const textarea = document.createElement('textarea');
             textarea.value = code;
             textarea.style.position = 'fixed'; textarea.style.opacity = 0;
             document.body.appendChild(textarea);
-            textarea.focus(); textarea.select();
-            try { document.execCommand('copy'); showCopied(); }
-            catch (err) { alert("Copie impossible"); }
+            textarea.select();
+            document.execCommand('copy');
             document.body.removeChild(textarea);
+            showCopied();
         }
 
         function showCopied() {
             copyBtn.textContent = "Copié !";
             copyBtn.classList.add('copied');
             setTimeout(() => {
-                copyBtn.textContent = "Copier le code";
+                copyBtn.textContent = "Copier le code principal";
                 copyBtn.classList.remove('copied');
             }, 2000);
         }
     }
-
     copyBtn.addEventListener('click', copyCode);
 
-    // === Recherche ===
+    // RECHERCHE AVEC ALTERNATIVES
     async function search() {
+        if (isSearching) return;
+        isSearching = true;
+
         const product = document.getElementById('product').value.trim();
-        if (!product) return alert("Veuillez décrire le produit");
+        if (!product) return alert("Décrivez le produit");
 
         const apiKey = localStorage.getItem('sh_apikey');
         if (!apiKey) return openSettings(), alert("Outil non activé");
@@ -247,8 +254,9 @@
         document.getElementById('loading').classList.add('show');
         document.getElementById('result').classList.remove('show');
         warningDiv.style.display = 'none';
-        copyBtn.textContent = "Copier le code";
-        copyBtn.classList.remove('copied');
+        alternativesDiv.style.display = 'none';
+        altList.innerHTML = '';
+        copyBtn.textContent = "Copier le code principal";
 
         try {
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -258,47 +266,79 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "openai/gpt-oss-20b:free",
+                    model: "openai/gpt-4o-mini", // ou claude-3.5-sonnet, gemini-1.5-pro, etc.
                     temperature: 0,
-                    max_tokens: 400,
+                    max_tokens: 600,
                     messages: [
-                        { role: "system", content: `Expert Nomenclature Combinée 2025 (NC8 France/UE).
+                        { role: "system", content: `Tu es expert en Nomenclature Combinée 2025 (NC8 France/UE).
 
-RÈGLES STRICTES :
-- 8 chiffres exactement
-- Code le plus courant en France
-- Si doute → "RTC recommandé" dans additional_info
+RÈGLES :
+- Réponds TOUJOURS avec un JSON valide
+- Code principal = le plus utilisé en France
+- Si doute → remplis "alternatives" et "warning"
 
-Réponds UNIQUEMENT avec ce JSON :
+Format exact :
 
-{"sh_code":"XXXXXXXX","description":"description claire","additional_info":"précision"}
-
-EXEMPLES 2025 :
-"T-shirt en coton" → {"sh_code":"61091000","description":"T-shirts en bonneterie de coton","additional_info":"Code standard France"}
-"Sac à main en cuir" → {"sh_code":"42022100","description":"Sacs à main en cuir","additional_info":"Code principal"}
-"iPhone" → {"sh_code":"85171300","description":"Téléphones intelligents sans fil","additional_info":"Code unique"}
+{
+  "main": {
+    "sh_code": "61091000",
+    "description": "T-shirts en bonneterie de coton",
+    "info": "Code le plus courant"
+  },
+  "alternatives": [
+    {
+      "sh_code": "61102099",
+      "description": "T-shirts en bonneterie autres",
+      "info": "Si mélange ou fibres synthétiques"
+    }
+  ],
+  "warning": "Cas limite → RTC recommandé"
+}
 
 Produit : "${product}"
 
-Donne le code NC8 2025 le plus sûr et le plus utilisé en France.` },
+Donne le code NC8 2025 le plus sûr + alternatives si nécessaire.` },
                         { role: "user", content: product }
                     ]
                 })
             });
 
-            if (!res.ok) throw new Error("Service indisponible");
+            if (!res.ok) throw new Error("API indisponible");
 
             const data = await res.json();
-            const json = JSON.parse(data.choices[0].message.content.trim());
+            const content = data.choices[0].message.content.trim();
 
-            codeElement.textContent = json.sh_code;
-            document.getElementById('desc').textContent = json.description;
-            document.getElementById('info').textContent = json.additional_info;
-            document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.sh_code}`;
+            let json;
+            try {
+                json = JSON.parse(content);
+            } catch (e) {
+                console.error("JSON invalide:", content);
+                alert("Réponse inattendue. Essayez une description plus claire.");
+                return;
+            }
 
-            if (json.additional_info.toLowerCase().includes("rtc")) {
+            // Résultat principal
+            codeElement.textContent = json.main.sh_code;
+            document.getElementById('desc').textContent = json.main.description;
+            document.getElementById('info').textContent = json.main.info;
+            document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.main.sh_code}`;
+
+            // Warning
+            if (json.warning) {
                 warningDiv.style.display = 'block';
-                warningDiv.textContent = "Cas complexe → Demande un RTC gratuit sur douane.gouv.fr";
+                warningDiv.innerHTML = `<strong>Attention :</strong> ${json.warning}`;
+            }
+
+            // Alternatives
+            if (json.alternatives && json.alternatives.length > 0) {
+                alternativesDiv.classList.add('show');
+                altList.innerHTML = json.alternatives.map(alt => `
+                    <div class="alt-item">
+                        <div class="alt-code">${alt.sh_code}</div>
+                        <div><strong>${alt.description}</strong></div>
+                        <div style="margin-top:6px; color:#555;">${alt.info || ''}</div>
+                    </div>
+                `).join('');
             }
 
             document.getElementById('result').classList.add('show');
@@ -306,15 +346,16 @@ Donne le code NC8 2025 le plus sûr et le plus utilisé en France.` },
             saveToHistory({
                 date: new Date().toISOString(),
                 product: product,
-                code: json.sh_code,
-                desc: json.description,
-                info: json.additional_info
+                code: json.main.sh_code,
+                desc: json.main.description
             });
 
         } catch (e) {
-            alert("Connexion impossible. Réessayez plus tard.");
+            console.error(e);
+            alert("Erreur réseau ou modèle indisponible. Réessayez plus tard.");
         } finally {
             document.getElementById('loading').classList.remove('show');
+            isSearching = false;
         }
     }
 
@@ -324,7 +365,7 @@ Donne le code NC8 2025 le plus sûr et le plus utilisé en France.` },
     function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
     function saveConfig() {
         const key = document.getElementById('api-key').value.trim();
-        if (!key) return alert("Clé d'activation requise");
+        if (!key) return alert("Clé d’activation requise");
         localStorage.setItem('sh_apikey', key);
         alert("Outil activé avec succès !");
         closeSettings();
