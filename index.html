@@ -9,7 +9,7 @@
         :root { --primary:#1a237e; --accent:#4fc3f7; --success:#2e7d32; --warning:#ff9800; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
         body { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; padding:20px 10px; color:#333; }
-        .container { max-width:950px; margin:auto; background:rgba(255,255,255,0.97); border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.25); position:relative; }
+        .container { max-width:950px; margin:auto; background:rgba(255,255,255,0.97); border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.25); }
         header { background:var(--primary); color:white; text-align:center; padding:35px 20px; position:relative; }
         h1 { font-size:2.8rem; margin-bottom:8px; }
         .subtitle { font-size:1.3rem; opacity:0.9; }
@@ -18,8 +18,8 @@
         .main { padding:40px 30px; }
         .search-card { background:white; border-radius:16px; padding:35px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center; }
         .card-title { font-size:1.8rem; color:var(--primary); margin-bottom:25px; }
-        input { width:100%; padding:18px; border:2px solid #ddd; border-radius:12px; font-size:1.1rem; margin-bottom:20px; }
-        input:focus { border-color:var(--accent); outline:none; box-shadow:0 0 0 4px rgba(79,195,247,0.15); }
+        input[type=text] { width:100%; padding:18px; border:2px solid #ddd; border-radius:12px; font-size:1.1rem; margin-bottom:20px; }
+        input[type=text]:focus { border-color:var(--accent); outline:none; box-shadow:0 0 0 4px rgba(79,195,247,0.15); }
         .button { background:var(--primary); color:white; border:none; padding:18px 40px; border-radius:12px; cursor:pointer; font-weight:600; font-size:1.2rem; transition:0.3s; margin:10px; }
         .button:hover { background:#283593; transform:translateY(-3px); }
         .btn-copy { background:var(--success); padding:14px 32px; font-size:1.1rem; }
@@ -37,7 +37,7 @@
         .result.show { display:block; animation:fadeIn 0.7s; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:none;} }
         .code { font-size:4.2rem; font-weight:900; color:var(--primary); letter-spacing:8px; font-family:'Courier New',monospace; background:#f0f7ff; display:inline-block; padding:12px 28px; border-radius:12px; margin:30px 0; }
-        .warning { background:#fff8e1; border-left:5px solid var(--warning); padding:18px; border-radius:8px; margin:25px 0; font-size:1rem; }
+        .warning { background:#fff8e1; border-left:5px solid var(--warning); padding:18px; border-radius:8px; margin:25px 0; font-size:1rem; display:none; }
         .alternatives { margin-top:35px; background:#f9f9f9; border-radius:12px; padding:20px; display:none; }
         .alternatives.show { display:block; }
         .alt-title { font-size:1.4rem; color:#d84315; margin-bottom:15px; text-align:left; }
@@ -56,6 +56,12 @@
         .modal-content { background:white; border-radius:16px; padding:30px; width:90%; max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative; }
         .close { position:absolute; top:15px; right:20px; font-size:2rem; cursor:pointer; color:#aaa; }
         .close:hover { color:#000; }
+
+        /* Champ clé avec œil */
+        .key-wrapper { position:relative; width:100%; margin-bottom:12px; }
+        .key-wrapper input { width:100%; padding:14px 45px 14px 14px; border:1px solid #ccc; border-radius:8px; font-size:1rem; }
+        .toggle-key { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.3rem; cursor:pointer; color:#666; }
+        .toggle-key:hover { color:#333; }
     </style>
 </head>
 <body>
@@ -80,7 +86,7 @@
                 <button class="example-btn" onclick="setExample('iPhone 16 Pro')">iPhone</button>
                 <button class="example-btn" onclick="setExample('Sac à main en cuir')">Sac cuir</button>
                 <button class="example-btn" onclick="setExample('Café en grains 1kg')">Café</button>
-                <button class="example-btn" onclick="setExample('Montre connectée avec écran OLED')">Montre</button>
+                <button class="example-btn" onclick="setExample('Montre connectée OLED')">Montre</button>
             </div>
 
             <button onclick="search()" class="button">Rechercher le code SH</button>
@@ -97,7 +103,7 @@
             <p style="font-size:1.2rem;"><strong>Description :</strong> <span id="desc">-</span></p>
             <p style="font-size:1rem;"><strong>Info :</strong> <span id="info">-</span></p>
 
-            <div id="warning" class="warning" style="display:none;"></div>
+            <div id="warning" class="warning"></div>
 
             <div id="alternatives" class="alternatives">
                 <div class="alt-title">Codes alternatifs possibles</div>
@@ -110,7 +116,6 @@
             </div>
         </div>
 
-        <!-- Historique -->
         <div class="history" id="history">
             <h3 style="margin-bottom:15px; color:var(--primary); text-align:center;">
                 Historique des recherches
@@ -127,7 +132,7 @@
     </div>
 
     <footer>
-        Code SH 2025 • Outil interne • Alternatives intégrées
+        Code SH 2025 • Outil interne • Alternatives + visibilité clé
     </footer>
 </div>
 
@@ -139,7 +144,14 @@
         
         <div style="margin-bottom:25px; text-align:center;">
             <label style="display:block; margin-bottom:10px; font-weight:600;">Clé d’activation</label>
-            <input type="password" id="api-key" placeholder="Collez votre clé ici" style="text-align:center; width:100%; padding:14px; border-radius:8px; border:1px solid #ccc;">
+            
+            <div class="key-wrapper">
+                <input type="password" id="api-key" placeholder="Collez votre clé ici" autocomplete="off">
+                <button type="button" class="toggle-key" onclick="toggleKeyVisibility()">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            
             <small style="color:#666; display:block; margin-top:8px;">Stockée uniquement sur votre appareil</small>
         </div>
 
@@ -211,7 +223,7 @@
         URL.revokeObjectURL(url);
     }
 
-    // Copie
+    // Copie du code principal
     function copyCode() {
         const code = codeElement.textContent.trim();
         if (!code || code === '—') return;
@@ -240,7 +252,20 @@
     }
     copyBtn.addEventListener('click', copyCode);
 
-    // RECHERCHE AVEC ALTERNATIVES
+    // Fonction afficher/masquer clé
+    function toggleKeyVisibility() {
+        const input = document.getElementById('api-key');
+        const icon = document.querySelector('.toggle-key i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    // Recherche
     async function search() {
         if (isSearching) return;
         isSearching = true;
@@ -254,7 +279,7 @@
         document.getElementById('loading').classList.add('show');
         document.getElementById('result').classList.remove('show');
         warningDiv.style.display = 'none';
-        alternativesDiv.style.display = 'none';
+        alternativesDiv.classList.remove('show');
         altList.innerHTML = '';
         copyBtn.textContent = "Copier le code principal";
 
@@ -266,7 +291,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "openai/gpt-4o-mini", // ou claude-3.5-sonnet, gemini-1.5-pro, etc.
+                    model: "openai/gpt-4o-mini",
                     temperature: 0,
                     max_tokens: 600,
                     messages: [
@@ -317,19 +342,17 @@ Donne le code NC8 2025 le plus sûr + alternatives si nécessaire.` },
                 return;
             }
 
-            // Résultat principal
+            // Affichage résultat principal
             codeElement.textContent = json.main.sh_code;
             document.getElementById('desc').textContent = json.main.description;
-            document.getElementById('info').textContent = json.main.info;
+            document.getElementById('info').textContent = json.main.info || '';
             document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.main.sh_code}`;
 
-            // Warning
             if (json.warning) {
                 warningDiv.style.display = 'block';
                 warningDiv.innerHTML = `<strong>Attention :</strong> ${json.warning}`;
             }
 
-            // Alternatives
             if (json.alternatives && json.alternatives.length > 0) {
                 alternativesDiv.classList.add('show');
                 altList.innerHTML = json.alternatives.map(alt => `
