@@ -6,62 +6,439 @@
     <title>Code SH • Douane Française 2025</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        :root { --primary:#1a237e; --accent:#4fc3f7; --success:#2e7d32; --warning:#ff9800; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
-        body { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; padding:20px 10px; color:#333; }
-        .container { max-width:950px; margin:auto; background:rgba(255,255,255,0.97); border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.25); }
-        header { background:var(--primary); color:white; text-align:center; padding:35px 20px; position:relative; }
-        h1 { font-size:2.8rem; margin-bottom:8px; }
-        .subtitle { font-size:1.3rem; opacity:0.9; }
-        .settings-btn { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2); color:white; border:none; width:50px; height:50px; border-radius:50%; font-size:1.5rem; cursor:pointer; }
-        .settings-btn:hover { background:rgba(255,255,255,0.3); transform:rotate(30deg); }
-        .main { padding:40px 30px; }
-        .search-card { background:white; border-radius:16px; padding:35px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center; }
-        .card-title { font-size:1.8rem; color:var(--primary); margin-bottom:25px; }
-        input[type=text] { width:100%; padding:18px; border:2px solid #ddd; border-radius:12px; font-size:1.1rem; margin-bottom:20px; }
-        input[type=text]:focus { border-color:var(--accent); outline:none; box-shadow:0 0 0 4px rgba(79,195,247,0.15); }
-        .button { background:var(--primary); color:white; border:none; padding:18px 40px; border-radius:12px; cursor:pointer; font-weight:600; font-size:1.2rem; transition:0.3s; margin:10px; }
-        .button:hover { background:#283593; transform:translateY(-3px); }
-        .btn-copy { background:var(--success); padding:14px 32px; font-size:1.1rem; }
-        .btn-copy.copied { background:#1b5e20; }
-        .btn-whatsapp { background:#25D366; padding:14px 32px; font-size:1.1rem; margin-top:15px; }
-        .btn-whatsapp:hover { background:#128C7E; }
-        .examples { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:30px 0; }
-        .example-btn { background:#f0f7ff; color:var(--primary); border:2px solid #bbdefb; padding:11px 20px; border-radius:50px; cursor:pointer; font-size:0.95rem; }
-        .example-btn:hover { background:#bbdefb; transform:scale(1.05); }
-        .loading { display:none; text-align:center; padding:50px; background:#f8f9fa; border-radius:16px; margin:30px 0; }
-        .loading.show { display:block; }
-        .spinner { border:8px solid #f0f0f0; border-top:8px solid var(--primary); border-radius:50%; width:70px; height:70px; animation:spin 1s linear infinite; margin:0 auto 20px; }
-        @keyframes spin { to { transform:rotate(360deg); } }
-        .result { display:none; background:#f8fff8; border-left:8px solid var(--success); padding:35px; border-radius:16px; margin-top:30px; text-align:center; }
-        .result.show { display:block; animation:fadeIn 0.7s; }
-        @keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:none;} }
-        .code { font-size:4.2rem; font-weight:900; color:var(--primary); letter-spacing:8px; font-family:'Courier New',monospace; background:#f0f7ff; display:inline-block; padding:12px 28px; border-radius:12px; margin:30px 0; }
-        .warning { background:#fff8e1; border-left:5px solid var(--warning); padding:18px; border-radius:8px; margin:25px 0; font-size:1rem; display:none; }
-        .alternatives { margin-top:35px; background:#f9f9f9; border-radius:12px; padding:20px; display:none; }
-        .alternatives.show { display:block; }
-        .alt-title { font-size:1.4rem; color:#d84315; margin-bottom:15px; text-align:left; }
-        .alt-item { background:white; padding:16px; margin-bottom:12px; border-radius:10px; border-left:4px solid #ff9800; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:left; }
-        .alt-code { font-size:1.6rem; font-weight:bold; color:#e65100; font-family:monospace; }
-        .rita-btn { display:block; margin:30px auto 0; background:var(--success); color:white; padding:16px 40px; border-radius:50px; text-decoration:none; font-weight:600; max-width:380px; }
-        .rita-btn:hover { background:#1b5e20; }
-        .history { background:#f8f9fa; border-radius:12px; padding:20px; margin-top:30px; max-height:400px; overflow-y:auto; }
-        .history-item { background:white; padding:15px; margin-bottom:12px; border-radius:10px; border-left:4px solid var(--primary); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
-        .history-date { font-size:0.85rem; color:#666; margin-bottom:8px; }
-        .history-code { font-size:1.4rem; font-weight:bold; color:var(--primary); }
-        .info { background:#e3f2fd; padding:20px; border-radius:12px; margin-top:30px; text-align:center; font-size:0.98rem; }
-        footer { text-align:center; padding:25px; color:#666; background:#f8f9fa; font-size:0.9rem; }
-        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000; }
-        .modal.show { display:flex; }
-        .modal-content { background:white; border-radius:16px; padding:30px; width:90%; max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative; }
-        .close { position:absolute; top:15px; right:20px; font-size:2rem; cursor:pointer; color:#aaa; }
-        .close:hover { color:#000; }
+        :root {
+            --primary: #1a237e;
+            --accent: #4fc3f7;
+            --success: #2e7d32;
+            --warning: #ff9800;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --input-bg: white;
+            --border-color: #ddd;
+            --history-bg: #f8f9fa;
+            --shadow-color: rgba(0, 0, 0, 0.25);
+        }
 
-        /* Champ clé avec œil */
-        .key-wrapper { position:relative; width:100%; margin-bottom:12px; }
-        .key-wrapper input { width:100%; padding:14px 45px 14px 14px; border:1px solid #ccc; border-radius:8px; font-size:1rem; }
-        .toggle-key { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.3rem; cursor:pointer; color:#666; }
-        .toggle-key:hover { color:#333; }
+        [data-theme="dark"] {
+            --primary: #7986cb;
+            --accent: #29b6f6;
+            --success: #4caf50;
+            --warning: #ffb74d;
+            --bg-gradient: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: rgba(30, 30, 40, 0.97);
+            --input-bg: #1e1e2e;
+            --border-color: #444;
+            --history-bg: #1e1e2e;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px 10px;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px var(--shadow-color);
+            transition: background 0.3s;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 35px 20px;
+            position: relative;
+        }
+        h1 { font-size: 2.8rem; margin-bottom: 8px; }
+        .subtitle { font-size: 1.3rem; opacity: 0.9; }
+        
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .theme-btn, .settings-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .theme-btn:hover, .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .main { padding: 40px 30px; }
+        .search-card {
+            background: var(--input-bg);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+        .card-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 25px; }
+        
+        input[type="text"], input[type="search"] {
+            width: 100%;
+            padding: 18px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        input[type="text"]:focus, input[type="search"]:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(79,195,247,0.15);
+        }
+        
+        .button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+        .button:hover {
+            background: #283593;
+            transform: translateY(-3px);
+        }
+        .btn-copy { background: var(--success); padding: 14px 32px; font-size: 1.1rem; }
+        .btn-copy.copied { background: #1b5e20; }
+        .btn-whatsapp { background: #25D366; padding: 14px 32px; font-size: 1.1rem; margin-top: 15px; }
+        .btn-whatsapp:hover { background: #128C7E; }
+        
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .example-btn {
+            background: #f0f7ff;
+            color: var(--primary);
+            border: 2px solid #bbdefb;
+            padding: 11px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        [data-theme="dark"] .example-btn {
+            background: #1a237e;
+            color: #bbdefb;
+            border-color: #3949ab;
+        }
+        .example-btn:hover {
+            background: #bbdefb;
+            transform: scale(1.05);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            background: var(--history-bg);
+            border-radius: 16px;
+            margin: 30px 0;
+        }
+        .loading.show { display: block; }
+        .spinner {
+            border: 8px solid #f0f0f0;
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .result {
+            display: none;
+            background: #f8fff8;
+            border-left: 8px solid var(--success);
+            padding: 35px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        [data-theme="dark"] .result {
+            background: #1e3c1e;
+        }
+        .result.show { display: block; animation: fadeIn 0.7s; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: none; }
+        }
+        
+        .code {
+            font-size: 4.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            background: #f0f7ff;
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        [data-theme="dark"] .code {
+            background: #1a237e;
+        }
+        
+        .warning {
+            background: #fff8e1;
+            border-left: 5px solid var(--warning);
+            padding: 18px;
+            border-radius: 8px;
+            margin: 25px 0;
+            font-size: 1rem;
+            display: none;
+        }
+        [data-theme="dark"] .warning {
+            background: #332900;
+        }
+        
+        .explanation {
+            background: #e8f5e9;
+            border-left: 5px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            display: none;
+        }
+        [data-theme="dark"] .explanation {
+            background: #1e3320;
+        }
+        .explanation.show { display: block; }
+        
+        .alternatives {
+            margin-top: 35px;
+            background: var(--history-bg);
+            border-radius: 12px;
+            padding: 20px;
+            display: none;
+        }
+        .alternatives.show { display: block; }
+        .alt-title { font-size: 1.4rem; color: #d84315; margin-bottom: 15px; text-align: left; }
+        .alt-item {
+            background: var(--input-bg);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border-left: 4px solid var(--warning);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: left;
+            transition: all 0.3s;
+        }
+        .alt-code { font-size: 1.6rem; font-weight: bold; color: #e65100; font-family: monospace; }
+        
+        .rita-btn {
+            display: block;
+            margin: 30px auto 0;
+            background: var(--success);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            max-width: 380px;
+            text-align: center;
+        }
+        .rita-btn:hover { background: #1b5e20; }
+        
+        .history-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .history-filter {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+        
+        .history {
+            background: var(--history-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+        .history-item {
+            background: var(--input-bg);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .history-date {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        [data-theme="dark"] .history-date {
+            color: #aaa;
+        }
+        .history-code { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        
+        .offline-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        .info {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.98rem;
+        }
+        [data-theme="dark"] .info {
+            background: #1a237e;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            background: var(--history-bg);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        [data-theme="dark"] footer {
+            color: #aaa;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .close:hover { color: var(--text-color); }
+        
+        .key-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .key-wrapper input {
+            width: 100%;
+            padding: 14px 45px 14px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+        .toggle-key {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #666;
+        }
+        .toggle-key:hover { color: var(--text-color); }
+        
+        .cache-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+        [data-theme="dark"] .cache-info {
+            color: #aaa;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--history-bg);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -70,9 +447,14 @@
     <header>
         <h1>Code SH 2025</h1>
         <p class="subtitle">Recherche précise • Douane Française & UE</p>
-        <button class="settings-btn" onclick="openSettings()">
-            <i class="fas fa-cog"></i>
-        </button>
+        <div class="header-controls">
+            <button class="theme-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="settings-btn" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
     </header>
 
     <div class="main">
@@ -80,7 +462,7 @@
             <h2 class="card-title">Description du produit</h2>
             <input type="text" id="product" placeholder="Ex: t-shirt coton, iPhone 16, sac cuir..."
                    onkeypress="if(event.key==='Enter') search()">
-
+            
             <div class="examples">
                 <button class="example-btn" onclick="setExample('T-shirt en coton 100%')">T-shirt</button>
                 <button class="example-btn" onclick="setExample('iPhone 16 Pro')">iPhone</button>
@@ -88,51 +470,86 @@
                 <button class="example-btn" onclick="setExample('Café en grains 1kg')">Café</button>
                 <button class="example-btn" onclick="setExample('Montre connectée OLED')">Montre</button>
             </div>
-
+            
             <button onclick="search()" class="button">Rechercher le code SH</button>
+            <div class="cache-info" id="cache-info"></div>
         </div>
-
+        
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Analyse précise en cours...</p>
         </div>
-
+        
         <div class="result" id="result">
             <h3 style="margin-bottom:25px;">Résultat principal</h3>
             <div class="code" id="code">—</div>
             <p style="font-size:1.2rem;"><strong>Description :</strong> <span id="desc">-</span></p>
             <p style="font-size:1rem;"><strong>Info :</strong> <span id="info">-</span></p>
-
+            
+            <div id="explanation" class="explanation">
+                <h4><i class="fas fa-info-circle"></i> Explication du code SH</h4>
+                <div id="explanation-content"></div>
+            </div>
+            
             <div id="warning" class="warning"></div>
-
+            
             <div id="alternatives" class="alternatives">
                 <div class="alt-title">Codes alternatifs possibles</div>
                 <div id="alt-list"></div>
             </div>
-
+            
             <div style="margin-top:30px;">
-                <button id="copy-btn" class="button btn-copy">Copier le code principal</button>
-                <a id="rita" href="#" target="_blank" class="rita-btn">Vérifier sur RITA (officiel)</a>
+                <button id="copy-btn" class="button btn-copy" onclick="copyCode()">Copier le code principal</button>
+                <a id="rita" href="#" target="_blank" class="rita-btn">
+                    Vérifier sur RITA (officiel)
+                </a>
             </div>
         </div>
-
+        
         <div class="history" id="history">
             <h3 style="margin-bottom:15px; color:var(--primary); text-align:center;">
-                Historique des recherches
-                <button onclick="exportAll()" class="button" style="float:right; font-size:0.9rem; padding:8px 16px;">Exporter tout (.txt)</button>
-                <button onclick="clearHistory()" class="button" style="float:right; margin-right:10px; font-size:0.9rem; padding:8px 16px; background:#e0e0e0; color:#333;">Vider</button>
+                <i class="fas fa-history"></i> Historique des recherches
+                <button onclick="exportAll()" class="button" style="float:right; font-size:0.9rem; padding:8px 16px;">
+                    Exporter tout (.txt)
+                </button>
+                <button onclick="clearHistory()" class="button" style="float:right; margin-right:10px; font-size:0.9rem; padding:8px 16px; background:#e0e0e0; color:#333;">
+                    Vider
+                </button>
             </h3>
+            
+            <div class="history-controls">
+                <input type="search" class="history-filter" id="history-search" placeholder="Rechercher dans l'historique..." oninput="filterHistory()">
+                <select class="history-filter" id="history-sort" onchange="renderHistory()">
+                    <option value="date-desc">Plus récent</option>
+                    <option value="date-asc">Plus ancien</option>
+                    <option value="product-asc">Produit (A-Z)</option>
+                    <option value="product-desc">Produit (Z-A)</option>
+                </select>
+                <select class="history-filter" id="history-period" onchange="renderHistory()">
+                    <option value="all">Toute période</option>
+                    <option value="today">Aujourd'hui</option>
+                    <option value="week">7 derniers jours</option>
+                    <option value="month">30 derniers jours</option>
+                </select>
+            </div>
+            
+            <div class="stats" id="history-stats">
+                <span>Total: <strong id="total-count">0</strong></span>
+                <span>En cache: <strong id="cache-count">0</strong></span>
+                <span>Hors ligne: <strong id="offline-count">0</strong></span>
+            </div>
+            
             <div id="history-list"></div>
         </div>
-
+        
         <div class="info">
-            Nomenclature combinée 2025 • Valable France & UE<br>
-            Toujours vérifier sur <a href="https://www.douane.gouv.fr" target="_blank">douane.gouv.fr</a>
+            <i class="fas fa-database"></i> Nomenclature combinée 2025 • Valable France & UE<br>
+            Toujours vérifier sur <a href="https://www.douane.gouv.fr" target="_blank" style="color:var(--primary);">douane.gouv.fr</a>
         </div>
     </div>
-
+    
     <footer>
-        Code SH 2025 • Outil interne • Alternatives + visibilité clé
+        Code SH 2025 • Outil interne • Cache activé • Mode hors ligne disponible
     </footer>
 </div>
 
@@ -140,10 +557,10 @@
 <div class="modal" id="settings-modal">
     <div class="modal-content">
         <span class="close" onclick="closeSettings()">×</span>
-        <h2 style="margin-bottom:20px; color:var(--primary); text-align:center;">Activation de l’outil</h2>
+        <h2 style="margin-bottom:20px; color:var(--primary); text-align:center;">Paramètres</h2>
         
         <div style="margin-bottom:25px; text-align:center;">
-            <label style="display:block; margin-bottom:10px; font-weight:600;">Clé d’activation</label>
+            <label style="display:block; margin-bottom:10px; font-weight:600;">Clé d'activation</label>
             
             <div class="key-wrapper">
                 <input type="password" id="api-key" placeholder="Collez votre clé ici" autocomplete="off">
@@ -154,104 +571,333 @@
             
             <small style="color:#666; display:block; margin-top:8px;">Stockée uniquement sur votre appareil</small>
         </div>
-
+        
+        <div style="margin-bottom:25px; padding:15px; background:var(--history-bg); border-radius:8px;">
+            <h4 style="margin-bottom:10px; color:var(--primary);">
+                <i class="fas fa-wifi"></i> Mode hors ligne
+            </h4>
+            <p style="font-size:0.9rem; margin-bottom:10px;">
+                Les 20 recherches les plus fréquentes sont stockées pour consultation hors connexion.
+            </p>
+            <button onclick="syncOfflineCache()" class="button" style="width:100%; padding:12px; font-size:1rem;">
+                <i class="fas fa-sync"></i> Synchroniser le cache
+            </button>
+        </div>
+        
         <div style="text-align:center; margin:25px 0;">
-            <p style="margin-bottom:15px; color:#555;">Vous n’avez pas encore de clé ?</p>
+            <p style="margin-bottom:15px; color:#555;">Vous n'avez pas encore de clé ?</p>
             <a href="https://wa.me/33695826180?text=Bonjour%2C%20je%20souhaiterais%20une%20cl%C3%A9%20d'activation%20pour%20l'outil%20Code%20SH%202025" 
                target="_blank" 
                class="button btn-whatsapp" 
                style="display:inline-flex; align-items:center; gap:10px;">
-                Demander la clé sur WhatsApp
+                <i class="fab fa-whatsapp"></i> Demander la clé sur WhatsApp
             </a>
         </div>
-
-        <button onclick="saveConfig()" class="button" style="width:100%;">Activer l’outil</button>
+        
+        <button onclick="saveConfig()" class="button" style="width:100%;">
+            <i class="fas fa-save"></i> Enregistrer les paramètres
+        </button>
     </div>
 </div>
 
 <script>
+    // Configuration initiale
+    const CONFIG = {
+        CACHE_SIZE: 20,
+        CACHE_KEY: 'sh_cache',
+        HISTORY_KEY: 'sh_history',
+        API_KEY: 'sh_apikey',
+        THEME_KEY: 'sh_theme'
+    };
+    
+    // Éléments DOM
     const historyList = document.getElementById('history-list');
     const warningDiv = document.getElementById('warning');
     const alternativesDiv = document.getElementById('alternatives');
     const altList = document.getElementById('alt-list');
     const copyBtn = document.getElementById('copy-btn');
     const codeElement = document.getElementById('code');
+    const explanationDiv = document.getElementById('explanation');
+    const explanationContent = document.getElementById('explanation-content');
+    const cacheInfo = document.getElementById('cache-info');
+    
     let isSearching = false;
-
-    // Historique
-    let history = JSON.parse(localStorage.getItem('sh_history') || '[]');
+    let cache = new Map();
+    
+    // Initialisation
+    loadCache();
+    loadTheme();
+    document.getElementById('api-key').value = localStorage.getItem(CONFIG.API_KEY) || '';
+    
+    // Système de cache
+    function loadCache() {
+        try {
+            const cached = localStorage.getItem(CONFIG.CACHE_KEY);
+            if (cached) {
+                const data = JSON.parse(cached);
+                cache = new Map(data);
+                updateCacheInfo();
+            }
+        } catch (e) {
+            console.error('Erreur chargement cache:', e);
+        }
+    }
+    
+    function saveCache() {
+        const data = Array.from(cache.entries());
+        localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(data));
+        updateCacheInfo();
+    }
+    
+    function updateCacheInfo() {
+        const size = cache.size;
+        if (size > 0) {
+            cacheInfo.innerHTML = `<i class="fas fa-database"></i> ${size} résultats en cache local`;
+        } else {
+            cacheInfo.innerHTML = '<i class="fas fa-database"></i> Aucun résultat en cache';
+        }
+        updateStats();
+    }
+    
+    function getFromCache(product) {
+        const normalized = product.toLowerCase().trim();
+        return cache.get(normalized);
+    }
+    
+    function addToCache(product, data) {
+        const normalized = product.toLowerCase().trim();
+        cache.set(normalized, {
+            ...data,
+            timestamp: Date.now(),
+            fromCache: false
+        });
+        
+        // Limiter la taille du cache
+        if (cache.size > CONFIG.CACHE_SIZE) {
+            const oldest = Array.from(cache.entries())
+                .sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+            cache.delete(oldest[0]);
+        }
+        
+        saveCache();
+    }
+    
+    // Thème sombre/clair
+    function loadTheme() {
+        const savedTheme = localStorage.getItem(CONFIG.THEME_KEY) || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+    
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem(CONFIG.THEME_KEY, newTheme);
+        updateThemeIcon(newTheme);
+    }
+    
+    function updateThemeIcon(theme) {
+        const icon = document.querySelector('.theme-btn i');
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    // Historique avec filtres
+    let history = JSON.parse(localStorage.getItem(CONFIG.HISTORY_KEY) || '[]');
     renderHistory();
-
+    
     function saveToHistory(entry) {
         history.unshift(entry);
-        if (history.length > 50) history.pop();
-        localStorage.setItem('sh_history', JSON.stringify(history));
+        if (history.length > 100) history.pop();
+        localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(history));
         renderHistory();
     }
-
-    function renderHistory() {
-        if (history.length === 0) {
-            historyList.innerHTML = '<p style="text-align:center; color:#999;">Aucun historique</p>';
-            return;
-        }
-        historyList.innerHTML = history.map(item => `
-            <div class="history-item">
-                <div class="history-date">${new Date(item.date).toLocaleString('fr-FR')}</div>
-                <div><strong>${item.product}</strong></div>
-                <div class="history-code">${item.code}</div>
-                <div style="font-size:0.9rem; margin-top:5px; color:#555;">${item.desc}</div>
-            </div>
-        `).join('');
+    
+    function filterHistory() {
+        const searchTerm = document.getElementById('history-search').value.toLowerCase();
+        renderHistory(searchTerm);
     }
-
+    
+    function renderHistory(searchTerm = '') {
+        let filtered = [...history];
+        
+        // Filtre de recherche
+        if (searchTerm) {
+            filtered = filtered.filter(item => 
+                item.product.toLowerCase().includes(searchTerm) ||
+                item.code.includes(searchTerm) ||
+                item.desc.toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        // Filtre par période
+        const period = document.getElementById('history-period').value;
+        const now = Date.now();
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date).getTime();
+            switch(period) {
+                case 'today':
+                    return now - itemDate < 24 * 60 * 60 * 1000;
+                case 'week':
+                    return now - itemDate < 7 * 24 * 60 * 60 * 1000;
+                case 'month':
+                    return now - itemDate < 30 * 24 * 60 * 60 * 1000;
+                default:
+                    return true;
+            }
+        });
+        
+        // Tri
+        const sortBy = document.getElementById('history-sort').value;
+        filtered.sort((a, b) => {
+            const aDate = new Date(a.date);
+            const bDate = new Date(b.date);
+            
+            switch(sortBy) {
+                case 'date-asc':
+                    return aDate - bDate;
+                case 'date-desc':
+                    return bDate - aDate;
+                case 'product-asc':
+                    return a.product.localeCompare(b.product);
+                case 'product-desc':
+                    return b.product.localeCompare(a.product);
+                default:
+                    return bDate - aDate;
+            }
+        });
+        
+        // Rendu
+        if (filtered.length === 0) {
+            historyList.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">Aucun historique</p>';
+        } else {
+            historyList.innerHTML = filtered.map(item => `
+                <div class="history-item">
+                    <div class="history-date">
+                        ${new Date(item.date).toLocaleString('fr-FR')}
+                        ${item.fromCache ? '<span class="offline-badge"><i class="fas fa-database"></i> Cache</span>' : ''}
+                    </div>
+                    <div><strong>${item.product}</strong></div>
+                    <div class="history-code">${item.code}</div>
+                    <div style="font-size:0.9rem; margin-top:5px; color:#555;">${item.desc}</div>
+                </div>
+            `).join('');
+        }
+        
+        updateStats();
+    }
+    
+    function updateStats() {
+        const offlineCount = history.filter(h => h.fromCache).length;
+        document.getElementById('total-count').textContent = history.length;
+        document.getElementById('cache-count').textContent = cache.size;
+        document.getElementById('offline-count').textContent = offlineCount;
+    }
+    
     function clearHistory() {
-        if (confirm("Vider tout l’historique ?")) {
+        if (confirm("Vider tout l'historique ?")) {
             history = [];
-            localStorage.removeItem('sh_history');
+            localStorage.removeItem(CONFIG.HISTORY_KEY);
             renderHistory();
         }
     }
-
+    
     function exportAll() {
         if (history.length === 0) return alert("Historique vide");
-        const lines = history.map(item => `${new Date(item.date).toISOString().slice(0,10)} | ${item.product} | ${item.code} | ${item.desc}`);
+        const lines = history.map(item => 
+            `${new Date(item.date).toISOString().slice(0,10)} | ${item.product} | ${item.code} | ${item.desc}`
+        );
         const text = "HISTORIQUE CODE SH 2025\n\n" + lines.join("\n");
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `CodeSH_Historique_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+        a.href = url;
+        a.download = `CodeSH_Historique_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
         URL.revokeObjectURL(url);
     }
-
-    // Copie du code principal
+    
+    // Synchronisation cache hors ligne
+    function syncOfflineCache() {
+        // Stocker les recherches fréquentes pour le mode hors ligne
+        const frequentSearches = [...history]
+            .sort((a, b) => b.count || 0 - a.count || 0)
+            .slice(0, CONFIG.CACHE_SIZE);
+        
+        // Marquer comme disponibles hors ligne
+        frequentSearches.forEach(item => {
+            item.fromCache = true;
+            if (getFromCache(item.product)) {
+                const cached = getFromCache(item.product);
+                cached.offline = true;
+                cache.set(item.product.toLowerCase().trim(), cached);
+            }
+        });
+        
+        saveCache();
+        alert(`${frequentSearches.length} recherches fréquentes disponibles hors ligne`);
+    }
+    
+    // CORRECTION : Fonction de copie du code principal
     function copyCode() {
         const code = codeElement.textContent.trim();
-        if (!code || code === '—') return;
-
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(code).then(showCopied);
-        } else {
-            const textarea = document.createElement('textarea');
-            textarea.value = code;
-            textarea.style.position = 'fixed'; textarea.style.opacity = 0;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showCopied();
+        console.log('Code à copier:', code);
+        
+        if (!code || code === '—' || code === '-') {
+            alert('Aucun code à copier. Effectuez d\'abord une recherche.');
+            return;
         }
-
-        function showCopied() {
-            copyBtn.textContent = "Copié !";
-            copyBtn.classList.add('copied');
-            setTimeout(() => {
-                copyBtn.textContent = "Copier le code principal";
-                copyBtn.classList.remove('copied');
-            }, 2000);
+        
+        // Méthode moderne avec Clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    showCopiedFeedback();
+                })
+                .catch(err => {
+                    console.error('Erreur Clipboard API:', err);
+                    fallbackCopy(code);
+                });
+        } else {
+            // Fallback pour les anciens navigateurs
+            fallbackCopy(code);
         }
     }
-    copyBtn.addEventListener('click', copyCode);
-
+    
+    function fallbackCopy(code) {
+        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = 0;
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // Pour mobile
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            if (success) {
+                showCopiedFeedback();
+            } else {
+                alert('Échec de la copie. Essayez de sélectionner et copier manuellement.');
+            }
+        } catch (err) {
+            console.error('Erreur fallback copy:', err);
+            alert('Impossible de copier. Code : ' + code);
+        }
+    }
+    
+    function showCopiedFeedback() {
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "✓ Copié !";
+        copyBtn.classList.add('copied');
+        
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.classList.remove('copied');
+        }, 2000);
+    }
+    
     // Fonction afficher/masquer clé
     function toggleKeyVisibility() {
         const input = document.getElementById('api-key');
@@ -264,25 +910,76 @@
             icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
     }
-
-    // Recherche
+    
+    // Explication du code SH
+    function generateExplanation(shCode) {
+        const explanations = {
+            '61': 'Chapitre 61 - Vêtements et accessoires en bonneterie',
+            '62': 'Chapitre 62 - Vêtements non en bonneterie',
+            '85': 'Chapitre 85 - Machines et appareils électriques',
+            '84': 'Chapitre 84 - Réacteurs nucléaires, chaudières, machines',
+            '09': 'Chapitre 09 - Café, thé et épices',
+            '71': 'Chapitre 71 - Perles, pierres précieuses',
+            '42': 'Chapitre 42 - Articles en cuir',
+            '90': 'Chapitre 90 - Instruments et appareils',
+            '95': 'Chapitre 95 - Jouets et articles de sport',
+            '96': 'Chapitre 96 - Articles divers'
+        };
+        
+        const chapter = shCode.substring(0, 2);
+        let explanation = explanations[chapter] || `Code SH commençant par ${chapter}`;
+        
+        // Ajouter des détails selon les premiers chiffres
+        if (shCode.startsWith('6109')) {
+            explanation += "<br>T-shirts, maillots de corps en bonneterie de coton";
+        } else if (shCode.startsWith('8517')) {
+            explanation += "<br>Appareils de télécommunication";
+        } else if (shCode.startsWith('4202')) {
+            explanation += "<br>Articles de maroquinerie en cuir";
+        }
+        
+        explanation += `<br><br><strong>Structure :</strong> ${chapter} (chapitre) - ${shCode.substring(2,4)} (position) - ${shCode.substring(4,6)} (sous-position) - ${shCode.substring(6,8)} (sous-sous-position)`;
+        
+        return explanation;
+    }
+    
+    // Recherche principale
     async function search() {
         if (isSearching) return;
         isSearching = true;
-
+        
         const product = document.getElementById('product').value.trim();
-        if (!product) return alert("Décrivez le produit");
-
-        const apiKey = localStorage.getItem('sh_apikey');
-        if (!apiKey) return openSettings(), alert("Outil non activé");
-
+        if (!product) {
+            alert("Veuillez décrire le produit");
+            isSearching = false;
+            return;
+        }
+        
+        // Vérifier le cache d'abord
+        const cachedResult = getFromCache(product);
+        if (cachedResult) {
+            console.log('Résultat depuis le cache');
+            displayResult(cachedResult, true);
+            isSearching = false;
+            return;
+        }
+        
+        const apiKey = localStorage.getItem(CONFIG.API_KEY);
+        if (!apiKey) {
+            openSettings();
+            alert("Outil non activé - veuillez entrer votre clé d'activation");
+            isSearching = false;
+            return;
+        }
+        
         document.getElementById('loading').classList.add('show');
         document.getElementById('result').classList.remove('show');
         warningDiv.style.display = 'none';
+        explanationDiv.classList.remove('show');
         alternativesDiv.classList.remove('show');
         altList.innerHTML = '';
         copyBtn.textContent = "Copier le code principal";
-
+        
         try {
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -295,12 +992,15 @@
                     temperature: 0,
                     max_tokens: 600,
                     messages: [
-                        { role: "system", content: `Tu es expert en Nomenclature Combinée 2025 (NC8 France/UE).
+                        { 
+                            role: "system", 
+                            content: `Tu es expert en Nomenclature Combinée 2025 (NC8 France/UE).
 
 RÈGLES :
 - Réponds TOUJOURS avec un JSON valide
 - Code principal = le plus utilisé en France
 - Si doute → remplis "alternatives" et "warning"
+- Inclus une explication du code pour les novices
 
 Format exact :
 
@@ -317,89 +1017,132 @@ Format exact :
       "info": "Si mélange ou fibres synthétiques"
     }
   ],
-  "warning": "Cas limite → RTC recommandé"
+  "warning": "Cas limite → RTC recommandé",
+  "explanation": "Explication du code pour les débutants"
 }
 
 Produit : "${product}"
 
-Donne le code NC8 2025 le plus sûr + alternatives si nécessaire.` },
+Donne le code NC8 2025 le plus sûr + alternatives si nécessaire.` 
+                        },
                         { role: "user", content: product }
                     ]
                 })
             });
-
-            if (!res.ok) throw new Error("API indisponible");
-
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('API Error:', errorText);
+                throw new Error(`API indisponible (${res.status})`);
+            }
+            
             const data = await res.json();
             const content = data.choices[0].message.content.trim();
-
+            
             let json;
             try {
                 json = JSON.parse(content);
             } catch (e) {
                 console.error("JSON invalide:", content);
-                alert("Réponse inattendue. Essayez une description plus claire.");
+                alert("Réponse inattendue de l'API. Essayez une description plus claire.");
+                isSearching = false;
+                document.getElementById('loading').classList.remove('show');
                 return;
             }
-
-            // Affichage résultat principal
-            codeElement.textContent = json.main.sh_code;
-            document.getElementById('desc').textContent = json.main.description;
-            document.getElementById('info').textContent = json.main.info || '';
-            document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.main.sh_code}`;
-
-            if (json.warning) {
-                warningDiv.style.display = 'block';
-                warningDiv.innerHTML = `<strong>Attention :</strong> ${json.warning}`;
-            }
-
-            if (json.alternatives && json.alternatives.length > 0) {
-                alternativesDiv.classList.add('show');
-                altList.innerHTML = json.alternatives.map(alt => `
-                    <div class="alt-item">
-                        <div class="alt-code">${alt.sh_code}</div>
-                        <div><strong>${alt.description}</strong></div>
-                        <div style="margin-top:6px; color:#555;">${alt.info || ''}</div>
-                    </div>
-                `).join('');
-            }
-
-            document.getElementById('result').classList.add('show');
-
-            saveToHistory({
-                date: new Date().toISOString(),
-                product: product,
-                code: json.main.sh_code,
-                desc: json.main.description
-            });
-
+            
+            // Ajouter au cache
+            addToCache(product, json);
+            
+            // Afficher le résultat
+            displayResult(json, false);
+            
         } catch (e) {
-            console.error(e);
-            alert("Erreur réseau ou modèle indisponible. Réessayez plus tard.");
+            console.error('Erreur recherche:', e);
+            alert("Erreur réseau ou modèle indisponible. Vérifiez votre connexion et votre clé API.");
         } finally {
             document.getElementById('loading').classList.remove('show');
             isSearching = false;
         }
     }
-
+    
+    function displayResult(json, fromCache) {
+        // Affichage résultat principal
+        codeElement.textContent = json.main.sh_code;
+        document.getElementById('desc').textContent = json.main.description;
+        document.getElementById('info').textContent = json.main.info || '';
+        document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.main.sh_code}`;
+        
+        // Explication
+        if (json.explanation) {
+            explanationContent.innerHTML = json.explanation;
+            explanationDiv.classList.add('show');
+        } else {
+            explanationContent.innerHTML = generateExplanation(json.main.sh_code);
+            explanationDiv.classList.add('show');
+        }
+        
+        if (json.warning) {
+            warningDiv.style.display = 'block';
+            warningDiv.innerHTML = `<strong><i class="fas fa-exclamation-triangle"></i> Attention :</strong> ${json.warning}`;
+        }
+        
+        if (json.alternatives && json.alternatives.length > 0) {
+            alternativesDiv.classList.add('show');
+            altList.innerHTML = json.alternatives.map(alt => `
+                <div class="alt-item">
+                    <div class="alt-code">${alt.sh_code}</div>
+                    <div><strong>${alt.description}</strong></div>
+                    <div style="margin-top:6px; color:#555;">${alt.info || ''}</div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('result').classList.add('show');
+        
+        // Ajouter à l'historique
+        saveToHistory({
+            date: new Date().toISOString(),
+            product: document.getElementById('product').value.trim(),
+            code: json.main.sh_code,
+            desc: json.main.description,
+            fromCache: fromCache,
+            count: 1
+        });
+        
+        // Mettre à jour le compteur si déjà dans l'historique
+        const existingIndex = history.findIndex(h => 
+            h.product.toLowerCase() === document.getElementById('product').value.toLowerCase().trim()
+        );
+        if (existingIndex > 0) {
+            history[existingIndex].count = (history[existingIndex].count || 0) + 1;
+            localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(history));
+        }
+    }
+    
     // Activation
-    document.getElementById('api-key').value = localStorage.getItem('sh_apikey') || '';
-    function openSettings() { document.getElementById('settings-modal').classList.add('show'); }
-    function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
+    function openSettings() { 
+        document.getElementById('settings-modal').classList.add('show'); 
+    }
+    function closeSettings() { 
+        document.getElementById('settings-modal').classList.remove('show'); 
+    }
     function saveConfig() {
         const key = document.getElementById('api-key').value.trim();
-        if (!key) return alert("Clé d’activation requise");
-        localStorage.setItem('sh_apikey', key);
-        alert("Outil activé avec succès !");
+        if (!key) return alert("Clé d'activation requise");
+        localStorage.setItem(CONFIG.API_KEY, key);
+        alert("Configuration enregistrée !");
         closeSettings();
     }
-
+    
     function setExample(text) {
         document.getElementById('product').value = text;
         document.getElementById('product').focus();
     }
-
-    window.onclick = e => { if (e.target.classList.contains('modal')) closeSettings(); };
+    
+    // Gestion des clics en dehors du modal
+    window.onclick = e => { 
+        if (e.target.classList.contains('modal')) closeSettings(); 
+    };
 </script>
 </body>
 </html>
