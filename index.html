@@ -265,10 +265,10 @@
         }
         .alt-code { font-size: 1.6rem; font-weight: bold; color: #e65100; font-family: monospace; }
         
-        .rita-btn {
+        .tarif-btn {
             display: block;
             margin: 30px auto 0;
-            background: var(--success);
+            background: #1976d2;
             color: white;
             padding: 16px 40px;
             border-radius: 50px;
@@ -276,8 +276,16 @@
             font-weight: 600;
             max-width: 380px;
             text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
         }
-        .rita-btn:hover { background: #1b5e20; }
+        .tarif-btn:hover { 
+            background: #0d47a1; 
+            transform: translateY(-2px);
+        }
+        .tarif-btn i {
+            margin-right: 10px;
+        }
         
         .history-controls {
             display: flex;
@@ -500,8 +508,8 @@
             
             <div style="margin-top:30px;">
                 <button id="copy-btn" class="button btn-copy" onclick="copyCode()">Copier le code principal</button>
-                <a id="rita" href="#" target="_blank" class="rita-btn">
-                    Vérifier sur RITA (officiel)
+                <a id="tarif-link" href="#" onclick="openTarifDouanier(event)" class="tarif-btn">
+                    <i class="fas fa-external-link-alt"></i> Vérifier sur TarifDouanier.eu
                 </a>
             </div>
         </div>
@@ -544,12 +552,12 @@
         
         <div class="info">
             <i class="fas fa-database"></i> Nomenclature combinée 2025 • Valable France & UE<br>
-            Toujours vérifier sur <a href="https://www.douane.gouv.fr" target="_blank" style="color:var(--primary);">douane.gouv.fr</a>
+            Toujours vérifier sur <a href="https://www.tarifdouanier.eu" target="_blank" style="color:var(--primary); font-weight:bold;">TarifDouanier.eu</a> pour confirmation officielle
         </div>
     </div>
     
     <footer>
-        Code SH 2025 • Outil interne • Cache activé • Mode hors ligne disponible
+        Code SH 2025 • Outil interne • Cache activé • Vérification sur TarifDouanier.eu
     </footer>
 </div>
 
@@ -620,9 +628,11 @@
     const explanationDiv = document.getElementById('explanation');
     const explanationContent = document.getElementById('explanation-content');
     const cacheInfo = document.getElementById('cache-info');
+    const tarifLink = document.getElementById('tarif-link');
     
     let isSearching = false;
     let cache = new Map();
+    let currentShCode = '';
     
     // Initialisation
     loadCache();
@@ -838,7 +848,7 @@
         alert(`${frequentSearches.length} recherches fréquentes disponibles hors ligne`);
     }
     
-    // CORRECTION : Fonction de copie du code principal
+    // Fonction de copie du code principal
     function copyCode() {
         const code = codeElement.textContent.trim();
         console.log('Code à copier:', code);
@@ -941,6 +951,84 @@
         explanation += `<br><br><strong>Structure :</strong> ${chapter} (chapitre) - ${shCode.substring(2,4)} (position) - ${shCode.substring(4,6)} (sous-position) - ${shCode.substring(6,8)} (sous-sous-position)`;
         
         return explanation;
+    }
+    
+    // Fonction pour ouvrir TarifDouanier.eu avec le code pré-rempli
+    function openTarifDouanier(event) {
+        event.preventDefault();
+        
+        if (!currentShCode || currentShCode === '—' || currentShCode === '-') {
+            alert('Veuillez d\'abord rechercher un code SH');
+            return;
+        }
+        
+        // Ouvrir TarifDouanier.eu dans un nouvel onglet
+        const tarifWindow = window.open('https://www.tarifdouanier.eu/2025', '_blank');
+        
+        if (!tarifWindow) {
+            alert('Veuillez autoriser les fenêtres pop-up pour cette fonctionnalité');
+            return;
+        }
+        
+        // Attendre que la page se charge, puis essayer de pré-remplir le champ
+        setTimeout(() => {
+            try {
+                // Injecter un script dans la nouvelle fenêtre pour pré-remplir le champ
+                const script = `
+                    try {
+                        // Essayer plusieurs sélecteurs possibles pour le champ SH
+                        const selectors = [
+                            'input[name="numero"]',
+                            'input[name="sh"]',
+                            'input[name="code"]',
+                            'input[placeholder*="SH"]',
+                            'input[placeholder*="code"]',
+                            '#search-input',
+                            '.search-input'
+                        ];
+                        
+                        let field = null;
+                        for (const selector of selectors) {
+                            field = document.querySelector(selector);
+                            if (field) break;
+                        }
+                        
+                        if (field) {
+                            field.value = '${currentShCode}';
+                            field.dispatchEvent(new Event('input', { bubbles: true }));
+                            field.dispatchEvent(new Event('change', { bubbles: true }));
+                            
+                            // Essayer de déclencher la recherche
+                            const searchBtn = document.querySelector('button[type="submit"], input[type="submit"], .search-btn');
+                            if (searchBtn) {
+                                setTimeout(() => searchBtn.click(), 500);
+                            }
+                        } else {
+                            console.log('Champ SH non trouvé sur TarifDouanier.eu');
+                        }
+                    } catch(e) {
+                        console.error('Erreur pré-remplissage:', e);
+                    }
+                `;
+                
+                tarifWindow.postMessage({ 
+                    type: 'INJECT_SCRIPT', 
+                    script: script,
+                    shCode: currentShCode 
+                }, '*');
+                
+            } catch (e) {
+                console.error('Erreur ouverture TarifDouanier:', e);
+            }
+        }, 2000); // Attendre 2 secondes pour le chargement de la page
+        
+        // Alternative simple : message à l'utilisateur
+        setTimeout(() => {
+            if (tarifWindow && !tarifWindow.closed) {
+                alert(`Rendez-vous sur TarifDouanier.eu et entrez manuellement le code : ${currentShCode}\n\nLe code a été copié dans votre presse-papiers.`);
+                copyCode();
+            }
+        }, 3000);
     }
     
     // Recherche principale
@@ -1066,11 +1154,16 @@ Donne le code NC8 2025 le plus sûr + alternatives si nécessaire.`
     }
     
     function displayResult(json, fromCache) {
+        // Stocker le code SH actuel
+        currentShCode = json.main.sh_code;
+        
         // Affichage résultat principal
         codeElement.textContent = json.main.sh_code;
         document.getElementById('desc').textContent = json.main.description;
         document.getElementById('info').textContent = json.main.info || '';
-        document.getElementById('rita').href = `https://www.douane.gouv.fr/fiche/rita-encore?code=${json.main.sh_code}`;
+        
+        // Mettre à jour le lien avec le code SH
+        tarifLink.title = `Vérifier le code ${currentShCode} sur TarifDouanier.eu (s'ouvre dans un nouvel onglet)`;
         
         // Explication
         if (json.explanation) {
